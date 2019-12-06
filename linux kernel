@@ -1,1 +1,102 @@
+首先请查看发行版和内核说明
+发行版版本查看：cat /etc/tlinux-release
+内核版本查看：uname -r
+rpm搜索和下载网址:https://tlinux-mirror.tencent-cloud.com/
+
+一、查看内核rpm包名
 rpm -qa | grep kernel
+内核	rpm包名	下载地址
+tkernel1物理机	kernel-tlinux	https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux/x86_64/RPMS/
+tkernel2物理机	kernel-tlinux2	tlinux1.2: https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-tkernel2/x86_64/RPMS/
+tlinux2.2: https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux/x86_64/RPMS/
+tkernel1 xen虚拟子机	kernel-tlinux_xenU	
+tkernel2 kvm 虚拟子机	kernel-tlinux2_kvm_guest	tlinux1.2: https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-kvm-guest/x86_64/RPMS/
+tlinux2.2: https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux-kvm-guest/x86_64/RPMS/
+tkernel2 xen 虚拟子机	kernel-tlinux2_xen_guest	
+tkernel3 物理机	kernel-tlinux3	tlinux1.2: https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-tkernel3/x86_64/RPMS/
+tlinux2.2: https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux-tkernel3/x86_64/RPMS/
+tkernel2 kvm母机	kernel-tlinux2_kvm_host	tlinux1.2: https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-virtualization/x86_64/RPMS/
+tlinux2.2: https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux-virtualization/x86_64/RPMS/
+二、升级内核
+2.1 内核大版本不变
+2.1.1 使用yum在线升级
+升级内核rpm使用yum update kernel-tlinuxxx ，其中kernel-tlinuxxx为内核包名，
+比如tlinux2.2-tkernel2或者tlinux1.2-tkernel2物理机升级内核使用如下命令：
+
+yum update kernel-tlinux2
+tlinux1.2-tkernel2 或者 tlinux2.2-tkernel2 kvm子机升级内核使用如下命令：
+
+yum update kernel-tlinux2_kvm_guest
+tlinux1.2-tkernel3 或者 tlinux2.2-tkernel3 物理机升级内核使用如下命令：
+
+yum update kernel-tlinux3
+2.1.2 离线升级方法
+在第一节中查找相应的内核rpm，进行安装即可。
+比如tlinux2.2-tkernel2物理机，从https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux/x86_64/RPMS/ 下载内核rpm，比如kernel-tlinux2-3.10.107-1.0046.tl2.x86_64.rpm，然后使用如下两条命令即可升级或安装内核rpm。
+
+rpm -Uvh kernel-tlinux2-3.10.107-1.0046.tl2.x86_64.rpm
+rpm -ivh kernel-tlinux2-3.10.107-1.0046.tl2.x86_64.rpm
+注意：内核升级完成，重启机器生效。
+
+2.2 内核大版本升级
+2.2.1 tlinux1.2-tkernel1物理机升级到tlinux1.2-tkernel2
+yum在线升级方法：
+下载http://mirror.oa.com/tlinux/tools/tlinux1.2-tkernel2-setup.py 然后执行
+或者：
+
+wget http://100.117.128.49/tlinux/tools/tlinux1.2-tkernel2-setup.py && python tlinux1.2-tkernel2-setup.py
+离线升级方法：
+从http://mirror.oa.com/tlinux/tools/ 下载一键升级工具，比如：http://mirror.oa.com/tlinux/tools/tlinux1.2-tkernel2-setup-3.10.107-1.0046.run ，
+上传到服务器，然后执行即可：
+
+sh tlinux1.2-tkernel2-setup-3.10.107-1.0046.run
+2.2.2 tlinux1.2-tkernel1 kvm子机升级到tlinux1.2-tkernel2
+从https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-kvm-guest/x86_64/RPMS/ 下载内核rpm和依赖包，使用rpm命令安装。
+首先分别下载如下两个包：
+https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-kvm-guest/x86_64/RPMS/kernel-tlinux2_kvm_guest-3.10.107-1.0046.tl1.x86_64.rpm
+https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-kvm-guest/x86_64/RPMS/linux-firmware-20150904-44.git6ebf5d5.tl1.noarch.rpm
+然后执行以下两个命令：
+
+rpm -Uvh linux-firmware-20150904-44.git6ebf5d5.tl1.noarch.rpm
+rpm -ivh kernel-tlinux2_kvm_guest-3.10.107-1.0046.tl1.x86_64.rpm
+2.2.3 tlinux1.2-tkernel1, tlinux1.2-tkernel2, tlinux2.2-tkernel2物理机升级到tkernel3内核
+yum在线升级方法：
+
+yum clean all && yum -y install  tlinux-tkernel3-release  && yum -y install kernel-tlinux3 &&  yum -y update crash kexec-tools perf
+内核debuginfo包安装方式：debuginfo-install kernel-tlinux3
+离线升级方法：
+从tlinux1.2: https://tlinux-mirror.tencent-cloud.com/tlinux/1.2/tlinux-tkernel3/x86_64/RPMS/
+或 tlinux2.2: https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux-tkernel3/x86_64/RPMS/
+下载内核等rpm包，然后使用rpm命令安装。
+
+注意：内核升级完成，重启后生效。
+
+三、安装指定版本内核或者kernel devel包
+3.1 安装指定内核包
+3.1.1 yum在线安装方法
+通过第一节查找相应的内核包名字，
+比如tlinux2.2-tkernel2 物理机，当前内核是3.10.107-1-tlinux2-0046，希望安装3.10.106-1-tlinux2-0044 版本，查找到包链接是：https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux/x86_64/RPMS/kernel-tlinux2-3.10.106-1.0044.tl2.x86_64.rpm
+那么物理机使用yum安装0044内核包的命令是：
+
+yum install kernel-tlinux2-3.10.106-1.0044.tl2
+3.1.2 离线安装方法
+通过第一节查找相应的内核包，下载安装即可，
+比如tlinux2.2-tkernel2 kvm子机，当前内核是0046，想安装0024内核，那么首先下载该文件：https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux-kvm-guest/x86_64/RPMS/kernel-tlinux2_kvm_guest-3.10.106-1.0024.tl2.x86_64.rpm
+然后上传到服务器，使用以下命令安装：
+
+rpm -Uvh --oldpackage kernel-tlinux2_kvm_guest-3.10.106-1.0024.tl2.x86_64.rpm
+3.2 安装指定内核的kernel devel包
+注意：仅tlinux2.2发行版包含kernel devel包，tlinux1.2如需使用kernel devel包，编译内核模块，请在tlinux2.2上安装相应版本的内核和kernel devel包进行操作，生成的模块可以在tlinux1.2使用。
+3.2.1 yum在线安装方法
+通过第一节查找相应发行版，相应内核的内核devel包，
+比如tlinux2.2-tkernel2 物理机，当前内核是3.10.106-1-tlinux2-0044，希望安装内核devel包，查到的包链接是：https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux/x86_64/RPMS/kernel-tlinux2-devel-3.10.106-1.0044.tl2.x86_64.rpm
+那么tlinux2.2-tkernel2物理机使用yum安装0044 内核 devel包的命令是：
+
+yum install kernel-tlinux2-devel-3.10.106-1.0044.tl2
+3.2.2 离线安装方法
+通过第一节查找相应的内核devel包，下载安装即可，
+比如tlinux2.2-tkernel2 物理机，安装0046的devel包，首先下载该文件：https://tlinux-mirror.tencent-cloud.com/tlinux/2.2/tlinux/x86_64/RPMS/kernel-tlinux2-devel-3.10.107-1.0046.tl2.x86_64.rpm
+然后上传到服务器，使用一下命令安装：
+
+rpm -ivh kernel-tlinux2-devel-3.10.107-1.0046.tl2.x86_64.rpm
+
